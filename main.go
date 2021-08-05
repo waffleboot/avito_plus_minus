@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+type pair struct {
+	i   int
+	sum int
+}
+
 func split(n int) []int {
 	digits := make([]int, 0, 20)
 	for n > 0 {
@@ -17,22 +22,31 @@ func split(n int) []int {
 	return digits
 }
 
-func calculate(nums []int, i int, sum int, text string) (string, bool) {
+func calculate(nums []int, i int, sum int, text string, memo map[pair]struct{}) (string, bool) {
+	if _, ok := memo[pair{i: i, sum: sum}]; ok {
+		return "", false
+	}
+	fmt.Println(i, sum)
 	if i == len(nums) {
 		if sum == 0 {
 			return text, true
 		}
 		return "", false
 	}
-	if text, ok := calculate(nums, i+1, sum-nums[i], text+"-"); ok {
+	if text, ok := calculate(nums, i+1, sum-nums[i], text+"-", memo); ok {
 		return text, true
 	}
-	return calculate(nums, i+1, sum+nums[i], text+"+")
+	if text, ok := calculate(nums, i+1, sum+nums[i], text+"+", memo); ok {
+		return text, true
+	}
+	memo[pair{i: i, sum: sum}] = struct{}{}
+	return "", false
 }
 
 func plus_minus(n int) string {
 	nums := split(n)
-	if text, ok := calculate(nums, nums[0], 1, ""); ok {
+	memo := make(map[pair]struct{})
+	if text, ok := calculate(nums, nums[0], 1, "", memo); ok {
 		return text
 	}
 	return "not possible"
