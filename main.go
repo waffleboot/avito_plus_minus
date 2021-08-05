@@ -26,7 +26,6 @@ func calculate(nums []int, i int, sum int, text string, memo map[pair]struct{}) 
 	if _, ok := memo[pair{i: i, sum: sum}]; ok {
 		return "", false
 	}
-	// fmt.Println(i, sum)
 	if i == len(nums) {
 		if sum == 0 {
 			return text, true
@@ -46,7 +45,7 @@ func calculate(nums []int, i int, sum int, text string, memo map[pair]struct{}) 
 func plus_minus(n int) string {
 	nums := split(n)
 	memo := make(map[pair]struct{})
-	if text, ok := calculate(nums, nums[0], 1, "", memo); ok {
+	if text, ok := calculate(nums, 1, nums[0], "", memo); ok {
 		return text
 	}
 	return "not possible"
@@ -58,20 +57,18 @@ func plus_minus2(n int) string {
 
 	nums := split(n)
 
-	dp := make([][]int, len(nums))
+	dp := make([][]bool, len(nums))
 	for i := 0; i < len(nums); i++ {
-		dp[i] = make([]int, 2*mid)
+		dp[i] = make([]bool, 2*mid)
 	}
 
-	dp[0][mid+nums[0]] = 1
+	dp[0][mid+nums[0]] = true
 
 	for i := 1; i < len(nums); i++ {
 		for sum := -mid; sum < mid; sum++ {
-			if dp[i-1][mid+sum] != 0 {
-				if dp[i][mid+sum+nums[i]] == 0 {
-					dp[i][mid+sum+nums[i]] = 1
-				}
-				dp[i][mid+sum-nums[i]] = -1
+			if dp[i-1][mid+sum] {
+				dp[i][mid+sum+nums[i]] = true
+				dp[i][mid+sum-nums[i]] = true
 			}
 		}
 	}
@@ -79,10 +76,8 @@ func plus_minus2(n int) string {
 	for i := 0; i < len(nums); i++ {
 		var buf strings.Builder
 		for j := 0; j < len(dp[i]); j++ {
-			if dp[i][j] > 0 {
+			if dp[i][j] {
 				buf.WriteRune('+')
-			} else if dp[i][j] < 0 {
-				buf.WriteRune('-')
 			} else {
 				buf.WriteRune(' ')
 			}
@@ -90,18 +85,18 @@ func plus_minus2(n int) string {
 		fmt.Println(buf.String())
 	}
 
-	if dp[len(nums)-1][mid+0] == 0 {
+	if !dp[len(nums)-1][mid+0] {
 		return "not possible"
 	}
 
 	var sum int
 	ans := make([]rune, len(nums)-1)
 	for i := len(nums) - 1; i > 0; i-- {
-		if dp[i][mid+sum] < 0 {
-			ans[i-1] = '-'
+		if dp[i-1][mid+sum-nums[i]] {
+			ans[i-1] = '+'
 			sum -= nums[i]
 		} else {
-			ans[i-1] = '+'
+			ans[i-1] = '-'
 			sum += nums[i]
 		}
 	}
@@ -112,9 +107,10 @@ func plus_minus2(n int) string {
 
 func main() {
 	// n := 2234
-	n := 11211
+	// n := 11211
 	// n := 123123123123
 	// n := 9223372036854775807
+	n := 9223372031
 	fmt.Println(plus_minus(n))
 	fmt.Println(plus_minus2(n))
 }
