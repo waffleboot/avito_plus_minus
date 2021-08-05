@@ -5,36 +5,8 @@ import (
 	"strings"
 )
 
-type collector struct {
-	digits []int
-	buf    []rune
-}
-
-func NewCollector(n int) *collector {
-	c := &collector{
-		digits: split(n),
-	}
-	c.buf = make([]rune, len(c.digits)-1)
-	return c
-}
-
-func (c *collector) collect(sum int, i int) bool {
-	if i+1 >= len(c.digits) {
-		if sum == 0 {
-			return true
-		}
-		return false
-	}
-	c.buf[i] = '-'
-	if ok := c.collect(sum-c.digits[i+1], i+1); ok {
-		return true
-	}
-	c.buf[i] = '+'
-	return c.collect(sum+c.digits[i+1], i+1)
-}
-
 func split(n int) []int {
-	digits := make([]int, 20)
+	digits := make([]int, 0, 20)
 	for n > 0 {
 		digits = append(digits, n%10)
 		n /= 10
@@ -45,10 +17,23 @@ func split(n int) []int {
 	return digits
 }
 
+func calculate(nums []int, i int, sum int, text string) (string, bool) {
+	if i == len(nums) {
+		if sum == 0 {
+			return text, true
+		}
+		return "", false
+	}
+	if text, ok := calculate(nums, i+1, sum-nums[i], text+"-"); ok {
+		return text, true
+	}
+	return calculate(nums, i+1, sum+nums[i], text+"+")
+}
+
 func plus_minus(n int) string {
-	c := NewCollector(n)
-	if ok := c.collect(c.digits[0], 0); ok {
-		return string(c.buf)
+	nums := split(n)
+	if text, ok := calculate(nums, nums[0], 1, ""); ok {
+		return text
 	}
 	return "not possible"
 }
@@ -75,9 +60,9 @@ func plus_minus_2(n int) string {
 }
 
 func main() {
-	// n := 123
+	// n := 11
 	// n := 123123123123
 	n := 9223372036854775807
 	fmt.Println(plus_minus(n))
-	fmt.Println(plus_minus_2(n))
+	// fmt.Println(plus_minus_2(n))
 }
