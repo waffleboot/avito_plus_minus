@@ -26,7 +26,7 @@ func calculate(nums []int, i int, sum int, text string, memo map[pair]struct{}) 
 	if _, ok := memo[pair{i: i, sum: sum}]; ok {
 		return "", false
 	}
-	fmt.Println(i, sum)
+	// fmt.Println(i, sum)
 	if i == len(nums) {
 		if sum == 0 {
 			return text, true
