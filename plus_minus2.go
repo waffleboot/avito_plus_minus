@@ -51,19 +51,26 @@ func plus_minus2(nums []int, verbose bool) string {
 }
 
 func backtrack(nums []int, dp [][]int) {
+
+	a := make([]int, 0, mid)
+	b := make([]int, 0, mid)
+
+	a = append(a, mid+0)
 	dp[len(dp)-1][mid+0] = 2
+
 	for i := len(nums) - 1; i > 0; i-- {
 		d := nums[i]
-		for sum := 0; sum < len(dp[0]); sum++ {
-			if dp[i][sum] == 2 {
-				if inside(sum-d) && dp[i-1][sum-d] == 1 {
-					dp[i-1][sum-d] = 2
-				}
-				if inside(sum+d) && dp[i-1][sum+d] == 1 {
-					dp[i-1][sum+d] = 2
-				}
+		for _, sum := range a {
+			if inside(sum-d) && dp[i-1][sum-d] == 1 {
+				b = append(b, sum-d)
+				dp[i-1][sum-d] = 2
+			}
+			if inside(sum+d) && dp[i-1][sum+d] == 1 {
+				b = append(b, sum+d)
+				dp[i-1][sum+d] = 2
 			}
 		}
+		a, b = b, a[:0]
 	}
 }
 
