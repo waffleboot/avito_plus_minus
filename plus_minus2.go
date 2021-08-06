@@ -15,13 +15,12 @@ func inside(k int) bool {
 func plus_minus2(nums []int, verbose bool) string {
 
 	dp := make([][]int, len(nums))
-	for i := 0; i < len(dp); i++ {
-		dp[i] = make([]int, 2*mid)
-	}
+	dp[0] = make([]int, 2*mid)
 
 	dp[0][mid+nums[0]] = 1
 
 	for i, d := range nums[1:] {
+		dp[i+1] = make([]int, 2*mid)
 		for sum := -mid; sum < mid; sum++ {
 			if inside(mid+sum) && dp[i][mid+sum] > 0 {
 				if inside(mid + sum + d) {
