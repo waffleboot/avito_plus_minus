@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"strings"
+	"sync"
 )
+
+const mid = 100
 
 type pair struct {
 	i   int
@@ -42,8 +45,7 @@ func calculate(nums []int, i int, sum int, text string, memo map[pair]struct{}) 
 	return "", false
 }
 
-func plus_minus(n int) string {
-	nums := split(n)
+func plus_minus(nums []int) string {
 	memo := make(map[pair]struct{})
 	if text, ok := calculate(nums, 1, nums[0], "", memo); ok {
 		return text
@@ -68,15 +70,19 @@ func margin(dp [][]int) (int, int) {
 	return l, r
 }
 
+func inside(k int) bool {
+	return 0 <= k && k < 2*mid
+}
+
 func backtrack(nums []int, mid int, dp [][]int) {
 	l, r := margin(dp)
 	dp[len(nums)-1][mid+0] = 2
 	for i := len(nums) - 2; i >= 0; i-- {
 		for j := l; j <= r; j++ {
 			if dp[i][j] == 1 {
-				if dp[i+1][j+nums[i+1]] == 2 {
+				if inside(j+nums[i+1]) && dp[i+1][j+nums[i+1]] == 2 {
 					dp[i][j] = 2
-				} else if dp[i+1][j-nums[i+1]] == 2 {
+				} else if inside(j-nums[i+1]) && dp[i+1][j-nums[i+1]] == 2 {
 					dp[i][j] = 2
 				}
 			}
@@ -84,20 +90,28 @@ func backtrack(nums []int, mid int, dp [][]int) {
 	}
 }
 
+var pathPool sync.Pool = sync.Pool{
+	New: func() interface{} {
+		return &strings.Builder{}
+	},
+}
+
 func path(nums []int, mid int, dp [][]int) string {
+	// dump(dp, false)
 	sum := nums[0]
-	ans := make([]rune, len(nums)-1)
+	ans := pathPool.Get().(*strings.Builder)
+	ans.Grow(len(nums) - 1)
 	for i := 1; i < len(nums); i++ {
 		if dp[i][mid+sum-nums[i]] == 2 {
-			ans[i-1] = '-'
+			ans.WriteRune('-')
 			sum -= nums[i]
 		} else {
-			ans[i-1] = '+'
+			ans.WriteRune('+')
 			sum += nums[i]
 		}
-
 	}
-	return string(ans)
+	pathPool.Put(ans)
+	return ans.String()
 }
 
 func dump(dp [][]int, all bool) {
@@ -118,11 +132,7 @@ func dump(dp [][]int, all bool) {
 	fmt.Println()
 }
 
-func plus_minus2(n int) string {
-
-	const mid = 100
-
-	nums := split(n)
+func plus_minus2(nums []int) string {
 
 	dp := make([][]int, len(nums))
 	for i := 0; i < len(nums); i++ {
@@ -133,9 +143,13 @@ func plus_minus2(n int) string {
 
 	for i := 1; i < len(nums); i++ {
 		for sum := -mid; sum < mid; sum++ {
-			if dp[i-1][mid+sum] > 0 {
-				dp[i][mid+sum+nums[i]] = 1
-				dp[i][mid+sum-nums[i]] = 1
+			if inside(mid+sum) && dp[i-1][mid+sum] > 0 {
+				if inside(mid + sum + nums[i]) {
+					dp[i][mid+sum+nums[i]] = 1
+				}
+				if inside(mid + sum - nums[i]) {
+					dp[i][mid+sum-nums[i]] = 1
+				}
 			}
 		}
 	}
@@ -154,10 +168,11 @@ func main() {
 	// n := 2234
 	// n := 11211
 	// n := 123123123123
-	n := 9223372036854775807
+	// n := split(9223372036854775807)
 	// n := 9223372031
 	// n := 9223372031
 	// fmt.Println(n)
+	n := []int{9, 2, 2, 3, 1, 7, 2, 0, 3, 6, 8, 5, 0, 1, 2, 1, 4, 4, 7, 7, 5, 8, 0, 7, 1, 2, 6, 1, 8, 4, 2, 1, 1, 2, 1, 7, 2, 9, 0, 1, 1, 6, 7, 1, 5, 2, 4}
 	fmt.Println(plus_minus(n))
 	fmt.Println(plus_minus2(n))
 }
