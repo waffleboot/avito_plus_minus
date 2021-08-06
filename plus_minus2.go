@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strings"
-	"sync"
 )
 
 const mid = 70 // min 10
@@ -17,7 +16,7 @@ func plus_minus2(nums []int, verbose bool) string {
 	dp := make([][]int, len(nums))
 	dp[0] = make([]int, 2*mid)
 
-	dp[0][mid+nums[0]] = 1
+	dp[0][mid+nums[0]] = 3
 
 	for i, d := range nums[1:] {
 		dp[i+1] = make([]int, 2*mid)
@@ -41,7 +40,7 @@ func plus_minus2(nums []int, verbose bool) string {
 
 	if verbose {
 		defer func() {
-			dump(dp, 3)
+			dump(dp, 2)
 		}()
 	}
 
@@ -73,30 +72,22 @@ func backtrack(nums []int, dp [][]int) {
 	}
 }
 
-var pathPool sync.Pool = sync.Pool{
-	New: func() interface{} {
-		return &strings.Builder{}
-	},
-}
-
 func path(nums []int, mid int, dp [][]int) string {
 	sum := nums[0]
-	ans := pathPool.Get().(*strings.Builder)
-	ans.Grow(len(nums) - 1)
+	ans := make([]rune, len(nums)-1)
 	for i := 1; i < len(dp); i++ {
 		d := nums[i]
 		if inside(mid+sum-d) && dp[i][mid+sum-d] == 2 {
 			dp[i][mid+sum-d] = 3
-			ans.WriteRune('-')
+			ans[i-1] = '-'
 			sum -= d
 		} else {
 			dp[i][mid+sum+d] = 3
-			ans.WriteRune('+')
+			ans[i-1] = '+'
 			sum += d
 		}
 	}
-	pathPool.Put(ans)
-	return ans.String()
+	return string(ans)
 }
 
 func margin(dp [][]int, min int) (int, int) {
@@ -127,11 +118,11 @@ func dump(dp [][]int, min int) {
 			if dp[i][j] >= min {
 				switch dp[i][j] {
 				case 3:
-					buf.WriteRune('3')
+					buf.WriteRune('+')
 				case 2:
-					buf.WriteRune('2')
+					buf.WriteRune('.')
 				case 1:
-					buf.WriteRune('1')
+					buf.WriteRune(' ')
 				}
 			} else {
 				buf.WriteRune(' ')
