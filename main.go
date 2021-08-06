@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-const mid = 100
+const mid = 70
 
 type pair struct {
 	i   int
@@ -74,16 +74,14 @@ func inside(k int) bool {
 	return 0 <= k && k < 2*mid
 }
 
-func backtrack(nums []int, mid int, dp [][]int) {
-	l, r := margin(dp)
-	dp[len(nums)-1][mid+0] = 2
+func backtrack(nums []int, dp [][]int) {
+	dp[len(dp)-1][mid+0] = 2
 	for i := len(nums) - 2; i >= 0; i-- {
-		for j := l; j <= r; j++ {
-			if dp[i][j] == 1 {
-				if inside(j+nums[i+1]) && dp[i+1][j+nums[i+1]] == 2 {
-					dp[i][j] = 2
-				} else if inside(j-nums[i+1]) && dp[i+1][j-nums[i+1]] == 2 {
-					dp[i][j] = 2
+		d := nums[i+1]
+		for sum := 0; sum < len(dp[0]); sum++ {
+			if dp[i][sum] == 1 {
+				if inside(sum+d) && dp[i+1][sum+d] == 2 || inside(sum-d) && dp[i+1][sum-d] == 2 {
+					dp[i][sum] = 2
 				}
 			}
 		}
@@ -97,17 +95,17 @@ var pathPool sync.Pool = sync.Pool{
 }
 
 func path(nums []int, mid int, dp [][]int) string {
-	// dump(dp, false)
 	sum := nums[0]
 	ans := pathPool.Get().(*strings.Builder)
 	ans.Grow(len(nums) - 1)
-	for i := 1; i < len(nums); i++ {
-		if dp[i][mid+sum-nums[i]] == 2 {
+	for i := 1; i < len(dp); i++ {
+		d := nums[i]
+		if inside(mid+sum-d) && dp[i][mid+sum-d] == 2 {
 			ans.WriteRune('-')
-			sum -= nums[i]
+			sum -= d
 		} else {
 			ans.WriteRune('+')
-			sum += nums[i]
+			sum += d
 		}
 	}
 	pathPool.Put(ans)
@@ -135,30 +133,31 @@ func dump(dp [][]int, all bool) {
 func plus_minus2(nums []int) string {
 
 	dp := make([][]int, len(nums))
-	for i := 0; i < len(nums); i++ {
+	for i := 0; i < len(dp); i++ {
 		dp[i] = make([]int, 2*mid)
 	}
 
 	dp[0][mid+nums[0]] = 1
 
 	for i := 1; i < len(nums); i++ {
+		d := nums[i]
 		for sum := -mid; sum < mid; sum++ {
 			if inside(mid+sum) && dp[i-1][mid+sum] > 0 {
-				if inside(mid + sum + nums[i]) {
-					dp[i][mid+sum+nums[i]] = 1
+				if inside(mid + sum + d) {
+					dp[i][mid+sum+d] = 1
 				}
-				if inside(mid + sum - nums[i]) {
-					dp[i][mid+sum-nums[i]] = 1
+				if inside(mid + sum - d) {
+					dp[i][mid+sum-d] = 1
 				}
 			}
 		}
 	}
 
-	if dp[len(nums)-1][mid+0] == 0 {
+	if dp[len(dp)-1][mid+0] == 0 {
 		return "not possible"
 	}
 
-	backtrack(nums, mid, dp)
+	backtrack(nums, dp)
 
 	return path(nums, mid, dp)
 
