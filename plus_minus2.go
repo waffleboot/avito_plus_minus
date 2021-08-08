@@ -5,27 +5,27 @@ import (
 	"strings"
 )
 
-const mid = 70 // min 10
-
-func inside(k int) bool {
-	return 0 <= k && k < 2*mid
+func inside(k int, mid int) bool {
+	return 0 <= k && k < mid+10
 }
 
 func plus_minus2(nums []int, verbose bool) string {
 
+	mid := len(nums) / 2 * 10
+
 	dp := make([][]int, len(nums))
-	dp[0] = make([]int, 2*mid)
+	dp[0] = make([]int, mid+10)
 
 	dp[0][mid+nums[0]] = 3
 
 	for i, d := range nums[1:] {
 		dp[i+1] = make([]int, 2*mid)
 		for sum := -mid; sum < mid; sum++ {
-			if inside(mid+sum) && dp[i][mid+sum] > 0 {
-				if inside(mid + sum + d) {
+			if inside(mid+sum, mid) && dp[i][mid+sum] > 0 {
+				if inside(mid+sum+d, mid) {
 					dp[i+1][mid+sum+d] = 1
 				}
-				if inside(mid + sum - d) {
+				if inside(mid+sum-d, mid) {
 					dp[i+1][mid+sum-d] = 1
 				}
 			}
@@ -36,7 +36,7 @@ func plus_minus2(nums []int, verbose bool) string {
 		return "not possible"
 	}
 
-	backtrack(nums, dp)
+	backtrack(nums, dp, mid)
 
 	if verbose {
 		defer func() {
@@ -44,11 +44,11 @@ func plus_minus2(nums []int, verbose bool) string {
 		}()
 	}
 
-	return path(nums, mid, dp)
+	return path(nums, dp, mid)
 
 }
 
-func backtrack(nums []int, dp [][]int) {
+func backtrack(nums []int, dp [][]int, mid int) {
 
 	a := make([]int, 0, mid)
 	b := make([]int, 0, mid)
@@ -59,11 +59,11 @@ func backtrack(nums []int, dp [][]int) {
 	for i := len(nums) - 1; i > 0; i-- {
 		d := nums[i]
 		for _, sum := range a {
-			if inside(sum-d) && dp[i-1][sum-d] == 1 {
+			if inside(sum-d, mid) && dp[i-1][sum-d] == 1 {
 				b = append(b, sum-d)
 				dp[i-1][sum-d] = 2
 			}
-			if inside(sum+d) && dp[i-1][sum+d] == 1 {
+			if inside(sum+d, mid) && dp[i-1][sum+d] == 1 {
 				b = append(b, sum+d)
 				dp[i-1][sum+d] = 2
 			}
@@ -72,12 +72,12 @@ func backtrack(nums []int, dp [][]int) {
 	}
 }
 
-func path(nums []int, mid int, dp [][]int) string {
+func path(nums []int, dp [][]int, mid int) string {
 	sum := nums[0]
 	ans := make([]rune, len(nums)-1)
 	for i := 1; i < len(dp); i++ {
 		d := nums[i]
-		if inside(mid+sum-d) && dp[i][mid+sum-d] == 2 {
+		if inside(mid+sum-d, mid) && dp[i][mid+sum-d] == 2 {
 			dp[i][mid+sum-d] = 3
 			ans[i-1] = '-'
 			sum -= d
