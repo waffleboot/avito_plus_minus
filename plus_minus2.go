@@ -19,8 +19,8 @@ func plus_minus2(nums []int, verbose bool) string {
 	dp[0][mid+nums[0]] = 3
 
 	for i, d := range nums[1:] {
-		dp[i+1] = make([]int, 2*mid)
-		for sum := -mid; sum < mid; sum++ {
+		dp[i+1] = make([]int, mid+10)
+		for sum := -mid; sum < mid+10; sum++ {
 			if inside(mid+sum, mid) && dp[i][mid+sum] > 0 {
 				if inside(mid+sum+d, mid) {
 					dp[i+1][mid+sum+d] = 1
