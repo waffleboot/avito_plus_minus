@@ -12,14 +12,14 @@ func main() {
 	// n := 9223372031
 	// n := 9223372031
 	// fmt.Println(n)
-	// n := []int{9, 2, 2, 3, 1, 7, 2, 0, 3, 6, 8, 5, 0, 1, 2, 1, 4, 4, 7, 7, 5, 8, 0, 7, 1, 2, 6, 1, 8, 4, 2, 1, 1, 2, 1, 7, 2, 9, 0, 1, 1, 6, 7, 1, 5, 2, 4}
-	// fmt.Println(plus_minus2(n, true))
-	// fmt.Println(plus_minus(n))
+	n := []int{9, 2, 2, 3, 1, 7, 2, 0, 3, 6, 8, 5, 0, 1, 2, 1, 4, 4, 7, 7, 5, 8, 0, 7, 1, 2, 6, 1, 8, 4, 2, 1, 1, 2, 1, 7, 2, 9, 0, 1, 1, 6, 7, 1, 5, 2, 4}
+	fmt.Println(plus_minus2(n, true))
+	fmt.Println(plus_minus(n))
 
-	s := 6996
-	for i := s; i < s+100; i++ {
-		n := split(i)
-		fmt.Println("---------------", i, n)
-		fmt.Println(plus_minus2(n, true))
-	}
+	// s := 6996
+	// for i := s; i < s+100; i++ {
+	// 	n := split(i)
+	// 	fmt.Println("---------------", i, n)
+	// 	fmt.Println(plus_minus2(n, true))
+	// }
 }
